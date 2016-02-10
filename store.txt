@@ -1,0 +1,7 @@
+1;Sword2;a;100
+1;Health Potion;h;10
+1;Bow2;a;100
+2;Sword3;a;200
+2;Bow3;a;200
+3;Bow4;a;300
+3;Sword4;a;300
