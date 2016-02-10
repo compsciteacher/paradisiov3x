@@ -1,7 +1,7 @@
 hh
-{'speed': 12, 'health': 96.19999999999999, 'strength': 12, 'magic': 6, 'stamina': 11, 'accuracy': 8}
+{'speed': 12, 'strength': 12, 'magic': 6, 'accuracy': 8, 'health': 96.19999999999999, 'stamina': 11}
 1000
 {'x': -11, 'y': 2}
 ['Sword4', 'Sword2']
 1
-21
+22

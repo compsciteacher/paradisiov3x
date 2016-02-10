@@ -266,6 +266,7 @@ H: Use Heal Potion
 Save: Save file
 Quit: Quit game
 ''')
+    os.startfile('ffmain.mp3')
     d=input('What action would you like to take?: ').lower()
     if d=='n':
         print('North')
@@ -553,7 +554,8 @@ def trap():#trap, auto damage unless avoided with d20 chance roll
         print('You found a trap, but were able to avoid it.')
         travelchoice()
           
-def orc(estats):#orc, gets estats passed to it
+def orc(estats):
+    os.startfile('Retribution.mp3')#orc, gets estats passed to it
     if estats['health']<=0:
         print('You killed it!')
         estats['c']=0
@@ -572,6 +574,7 @@ def orc(estats):#orc, gets estats passed to it
 
         
 def goblin(estats):
+    os.startfile('Retribution.mp3')
     print('----------------------------------------\n\n')
     if estats['health']<=0:
         print('You killed it!')
@@ -598,6 +601,7 @@ Run
 Defend
 ''')
     a=input('What do you want to do?').lower()
+    
     if a=='attack':
         a=1
     elif a=='run':
