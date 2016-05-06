@@ -1,7 +1,5 @@
-##HCD Final Fantasy test v .3 last update 5/8/15
+##HCD Final Fantasy test v .3 last update 2/12/16
 #Added melee,archery weapons and their bonuses
-
-#NEED TO ADD spells
 
 ##Multi character, mapped, simple AI, single weapon, 4 race, single ability
 #tested with two enemy types (goblin/orc), attack, defend, run all work, melee, magic, defend all work
@@ -9,10 +7,12 @@
 #mapgen created, gives map, and a separate file with sorted locations to make easier to test, hit 50 or -50 boots you to 0,0
 #try created to check for file in two places before kicking an error
 #created inventory, will add items as needed, deciding on weight calc
+#Added audio, mp3s. One plays at start. Other plays during attacks. Volume set to 70%
+#audio does not reboot on attacks now, just keeps playing
 
-#GAVE ENEMY GENERIC ATTACKS< SEEM TO ALWAYS MISS
 
-import math, sys, random, time, cmd, textwrap, string,os
+
+import math, sys, random, time, cmd, textwrap, string,os, mp3play
 sw=80
 pname=""#primary name
 sname=""#secondary name
@@ -28,10 +28,18 @@ lvl=1#difficulty level, will be increased over time
 exp=0
 dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}#first roll of dice, rolled at the beginning of all functions to see if needed
 inv=[]#inventory starts empty
+clip=mp3play.load(r'ffmain.mp3')
+clip2=mp3play.load(r'Retribution.mp3')
+firstplay=0
 
-
-
-def maingreeting(): #only on game open
+    
+def maingreeting():
+    
+    clip.volume(7)
+    clip2.volume(7)
+    clip.play()#only on game open
+    
+    #main audio file, plays until fight. Starts again at end of fight.
     print('''
 ---------------------------------
 Welcome to Paradisio, the land of near paradise....
@@ -54,7 +62,9 @@ Welcome to Paradisio, the land of near paradise....
         print('INVALID')#catch
         maingreeting()
 
-def newg(): #start new game, player name and race globalized
+def newg():
+    
+    #start new game, player name and race globalized
     global pname, race
     welcome=('''
 
@@ -244,8 +254,13 @@ You have gained one point to use to increase your stats! Choose carefully...
         print('THAT IS NOT A CHOICE!')
         levelup()
 
-def travelchoice():#this is to choose direction, and speed. gives location first, also shows health and gold
+def travelchoice():
+    #this is to choose direction, and speed. gives location first, also shows health and gold
     levelcheck()
+    global firstplay
+    firstplay=0
+    if clip.isplaying()==True:
+        clip.play()#check if playing, if not then play file
     time.sleep(5)
     os.system('cls' if os.name == 'nt' else 'clear')
     print('----------------------------------------')
@@ -266,7 +281,7 @@ H: Use Heal Potion
 Save: Save file
 Quit: Quit game
 ''')
-    os.startfile('ffmain.mp3')
+    
     d=input('What action would you like to take?: ').lower()
     if d=='n':
         print('North')
@@ -555,7 +570,12 @@ def trap():#trap, auto damage unless avoided with d20 chance roll
         travelchoice()
           
 def orc(estats):
-    os.startfile('Retribution.mp3')#orc, gets estats passed to it
+    clip.stop()
+    global firstplay
+    if firstplay==0:
+        clip2.play()
+        firstplay+=1
+    
     if estats['health']<=0:
         print('You killed it!')
         estats['c']=0
@@ -574,7 +594,11 @@ def orc(estats):
 
         
 def goblin(estats):
-    os.startfile('Retribution.mp3')
+    clip.stop()
+    global firstplay
+    if firstplay==0:
+        clip2.play()
+        firstplay+=1
     print('----------------------------------------\n\n')
     if estats['health']<=0:
         print('You killed it!')
@@ -626,6 +650,8 @@ Defend
         if crun>=16:
             print('You escaped!')
             time.sleep(1)
+            clip2.stop()
+            clip.play()
             travelchoice()
         else:
             print('The enemy catches you!')
@@ -702,6 +728,8 @@ def melee(estats,etype):
                 exp+=random.randint(1,10)
             elif etype=='goblin1':
                 exp+=random.randint(1,5)
+            clip2.stop()
+            clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
@@ -734,6 +762,8 @@ def magic(estats,etype):
             time.sleep(1)
             estats['c']=0
             exp+=random.randint(1,10)
+            clip2.stop()
+            clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
@@ -765,6 +795,8 @@ def shoot(estats,etype):
                 exp+=random.randint(1,5)
             time.sleep(1)
             estats['c']=0
+            clip2.stop()
+            clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
@@ -923,6 +955,8 @@ def eact(estats,etype):#enemy action
     if estats['health']<3:
         if dice['20r']>=18:
             print('They escaped!')
+            clip2.stop()
+            clip.play()
             travelchoice()
             
         else:
@@ -978,8 +1012,10 @@ def load():#load last saved info
     global gold, stats, loc,pname,inv,lvl,exp
     try:
         svfile=open('paradisiosave.txt','r')#check for check file in current directory
+    except FileNotFoundError:
+        svfile=open('paradisiosave'+'.txt','r')
     except:
-        svfile=open('paradisiosave.txt','r')#check android download folder
+        print('UH OH!')#check android download folder
 
     pname=svfile.readline().strip('\n')
     stats=eval(svfile.readline())
