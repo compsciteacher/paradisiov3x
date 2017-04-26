@@ -445,6 +445,7 @@ def treasure():#gives treasure based on d20 roll, you can actually lose gold on 
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     global gold
     chance=dice['20r']
+    print("You rolled a "+ str(chance))
     if chance<19 and chance>=2:
         print('You found treasure!')
         tre=dice['20r']*chance
@@ -722,6 +723,7 @@ def melee(estats,etype):
         estats['health']-=dmg
         if estats['health']<=0:
             print('You killed it!')
+            treasure()
             time.sleep(1)
             estats['c']=0
             if etype=='orc1':
@@ -755,6 +757,7 @@ def magic(estats,etype):
         estats['health']-=dmg
         if estats['health']<=0:
             print('You killed it!')
+            treasure()
             if etype=='orc1':
                 exp+=random.randint(1,10)
             elif etype=='goblin1':
@@ -789,6 +792,7 @@ def shoot(estats,etype):
         estats['health']-=dmg
         if estats['health']<=0:
             print('You killed it!')
+            treasure()
             if etype=='orc1':
                 exp+=random.randint(1,10)
             elif etype=='goblin1':
