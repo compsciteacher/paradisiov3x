@@ -1,5 +1,8 @@
-##HCD Final Fantasy test v .3 last update 2/12/16
+##HCD Final Fantasy test v .3 last update 4/23/18
+#changing everything to classes to make much easier to keep track of entities, and possibly add more characters
 #Added melee,archery weapons and their bonuses
+#still some old things carried over in globals, clean up under way with audio errors too
+
 
 ##Multi character, mapped, simple AI, single weapon, 4 race, single ability
 #tested with two enemy types (goblin/orc), attack, defend, run all work, melee, magic, defend all work
@@ -17,22 +20,53 @@ sw=80
 pname=""#primary name
 sname=""#secondary name
 tname=""#third name
-race=""
 race2=''
 race3=''
-stats={'health':0,'strength':0,'magic':0,'stamina':0,'accuracy':0,'speed':0} #stats dictionary starts at 0
+#stats={'health':0,'strength':0,'magic':0,'stamina':0,'accuracy':0,'speed':0} #stats dictionary starts at 0
 estats={'health':1,'strength':0,'magic':0,'stamina':0,'accuracy':0,'speed':0,'c':0} #estats dictionary starts at 0
 gold=1000 #starting global gold
 loc={'x':0,'y':0}#location by dictionary
-lvl=1#difficulty level, will be increased over time
-exp=0
+#lvl=1#difficulty level, will be increased over time
+
 dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}#first roll of dice, rolled at the beginning of all functions to see if needed
 inv=[]#inventory starts empty
 clip=mp3play.load(r'ffmain.mp3')
 clip2=mp3play.load(r'Retribution.mp3')
 firstplay=0
 
-    
+class Enemy:
+    def __init__(self,health,strength, magic,accuracy,speed,lvl):
+        self.health=health
+        self.strength=strength
+        self.magic=magic
+        self.accuracy=accuracy
+        self.speed=speed
+        self.lvl=lvl
+    def life(self):
+        return(self.health)
+
+
+class Player:
+    def __init__(self,strength,magic_att,stamina,accuracy,speed,health,race,lvl):
+        self.health=health
+        self.strength=strength
+        self.magic=magic_att
+        self.stamina=stamina
+        self.accuracy=accuracy
+        self.speed=speed
+        self.race=race
+        self.exp=0
+        self.level=1
+        self.gold=0
+        self.lvl=lvl
+    def return_stats(self):
+        return ('''Strength: %s
+Magic: %s
+Stamina: %s
+Accuracy: %s
+Speed: %s
+Health: %s'''%(self.strength,self.magic,self.stamina,self.accuracy,self.speed,self.health))
+
 def maingreeting():
     
     clip.volume(7)
@@ -65,7 +99,7 @@ Welcome to Paradisio, the land of near paradise....
 def newg():
     
     #start new game, player name and race globalized
-    global pname, race
+    global pname
     welcome=('''
 
 You have awoken in a land that is new to you, feeling as though you have been
@@ -83,7 +117,7 @@ who found you on the roadside.
     if human_choice=='y': #if human change race and call human function
         time.sleep(1)
         print('Young girl: Oh, it must have just been how dirty you were. Good luck on your travels.')
-        race='h'
+        #race='h'
         time.sleep(1)
         human()
         travelchoice()
@@ -106,14 +140,14 @@ Enter the number: ''')
 
 """)
         time.sleep(1)
-        race='h'
+        #race='h'
         human()
     elif r_choice=='2':
         print("""Young girl: I've never met an Elf before, you look strange... yet kind of beautiful. I hope you won't hurt us
 
               """)
         time.sleep(1)
-        race='e'
+        #race='e'
         elf()
     elif r_choice=='3':
         print("Young girl: AHHHH!!!")
@@ -126,7 +160,7 @@ this land is not used to evil creatures like you. At least they won't bug you ei
         time.sleep(1)
         for line in textwrap.wrap(resp,sw):
             print(line)
-        race='t'
+        #race='t'
         troll()
     elif r_choice=='4':
         resp=("""Young girl: Explains why you are so short.
@@ -137,119 +171,104 @@ You look silly, I'm going to go tell my friends I saw a silly creature!
         for line in textwrap.wrap(resp,sw):
             print(line)
         time.sleep(1)
-        race='d'
+        #race='d'
         dwarf()
     else:
         racechoice()
     travelchoice()
-def human():#human race chosen, update global stats dictionary with random rolls
-    dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    global stats#use global stats
+def human():#human race chosen, create player object with correct stats
+    global player_one
     print('Human')
-    stats['strength']=random.randint(3,18)
-    if stats['strength']<8:#if strength less than 8, they at least get a 1 bonus
-        stats['strength']+=1
-    stats['magic']=random.randint(3,18)
-    stats['stamina']=random.randint(3,18)#not sure what to use stamina for
-    if stats['stamina']<8:
-        stats['stamina']+=2#if stamina less than 8, auto add two to bring it up
-    stats['accuracy']=random.randint(3,18)
-    stats['speed']=random.randint(3,18)
-    stats['health']=100
+    #stats['strength']=random.randint(3,18)
+    player_one=Player(random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),100,'human',0)
+
     print('Your character has the following stats:')
-    
-    for (s,v) in stats.items():#show full stats
-            print(s.title(),": ",v)
+    print(player_one.return_stats())
     print('----------------------------------------')
     time.sleep(3)
-def elf():#elf race chosen, update global stats dictionary with random rolls
-    dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    global stats
+def elf():#elf race chosen, create player object with correct stats
+    global player_one
     print('Elf')
-    stats['strength']=random.randint(3,18)
-    stats['magic']=random.randint(3,18)
-    if stats['magic']<8:
-        stats['magic']+=1
-    stats['stamina']=random.randint(3,18)
+    player_one = Player(random.randint(3, 15), random.randint(5, 18), random.randint(3, 18),
+                        random.randint(8, 18), random.randint(9, 18), 110, 'elf',0)
 
-    stats['accuracy']=random.randint(3,18)
-    if stats['accuracy']<8:#if they get less than an 8, auto add 3
-        stats['accuracy']+=3
-    stats['speed']=random.randint(9,18)#speed has an auto 9, crazy high
-    stats['health']=110
+
+
+
     print('Your character has the following stats:')#show stats
-    for (s,v) in stats.items():
-            print(s.title(),": ",v)
+    print(player_one.return_stats())
     print('----------------------------------------')
     time.sleep(3)
     
-def troll():#troll race chosen, update global stats dictionary with random rolls
-    dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    global stats
+def troll():#troll race chosen, create player object with correct stats
+    global player_one
+    player_one = Player(random.randint(9, 18), random.randint(1, 15), random.randint(9, 18),
+                        random.randint(1, 14), random.randint(1, 10), 125, 'troll',0)
     print('Troll')
-    stats['strength']=random.randint(9,18)#troll only one with predetermined ranges for their stats, no plusses. goes low and high
-    stats['magic']=random.randint(1,15)#magic is very limited
-    
-    stats['stamina']=random.randint(9,18)
 
-    stats['accuracy']=random.randint(1,14)
-    stats['speed']=random.randint(1,10)
-    stats['health']=125
     print('Your character has the following stats:')
-    for (s,v) in stats.items():
-            print(s.title(),": ",v)
+    print(player_one.return_stats())
     print('----------------------------------------')
     time.sleep(3)
     
-def dwarf():#dwarf race chosen, update global stats dictionary with random rolls
-    dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    global stats
+def dwarf():#dwarf race chosen, create player object with correct stats
+    global player_one
     print('Dwarf')
-    stats['strength']=random.randint(1,18)
-    if stats['strength']<10:
-      stats['strength']+=3
-    stats['magic']=random.randint(1,18)
-    if stats['magic']>16:
-        magic-=1
-    stats['stamina']=random.randint(1,18)
-    if stats['stamina']<10:
-      stats['stamina']+=3
-    stats['accuracy']=random.randint(1,18)
-    stats['speed']=random.randint(1,16)
-    stats['health']=100
+    player_one = Player(random.randint(4, 18), random.randint(1, 16), random.randint(9, 18),
+                        random.randint(1, 18), random.randint(1, 18), 100, 'dwarf',0)
+
     print('Your character has the following stats:')
-    for (s,v) in stats.items():
-            print(s.title(),": ",v)
+    print(player_one.return_stats())
     print('----------------------------------------')
     time.sleep(3)
+
+def orc():
+    return(Enemy(20,5, 3,5,2,3))
+
+def goblin():
+    return (Enemy(10, 2, 4, 7, 7, 1))
+
+def delf():
+    return(Enemy(10,2,7,7,7,2))
+
 def levelcheck():
-    global exp,lvl
+
     nlvl=0
     try:
         check=open('level.txt','r')
         for line in check:
             n=line.split()
-            if exp>=int(n[0]):
+            if player_one.exp>=int(n[0]):
                 nlvl=int(n[1])
-        if nlvl>lvl:
+        if nlvl>player_one.lvl:
             print('LEVEL UP!')
-            lvl=nlvl
+            player_one.lvl=nlvl
             levelup()
         check.close()
-    except:
+    except FileNotFoundError:
         print('LEVEL ERROR')
+
 def levelup():
     global stats
-    points=1
+
     print('''
 You have gained one point to use to increase your stats! Choose carefully...
 ''')
-    for (x,y) in stats.items():
-        print(x.title(),': ',y)
+    print(player_one.return_stats())
     c=input('What stat do you want to increase? ').lower()
-    if c in stats.keys():
-        stats[c]+=1
-        print('You have increased ',c.title(),' one point')
+    #must be a better way, not sure yet
+    if c=='strength':
+        player_one.strength+=1
+    elif c=='magic':
+        player_one.magic+=1
+    elif c=='accuracy':
+        player_one.accuracy+=1
+    elif c=='stamina':
+        player_one.stamina+=1
+    elif c=='speed':
+        player_one.speed+=1
+    elif c=='health':
+        player_one.health+=10
     else:
         print('THAT IS NOT A CHOICE!')
         levelup()
@@ -258,16 +277,18 @@ def travelchoice():
     #this is to choose direction, and speed. gives location first, also shows health and gold
     levelcheck()
     global firstplay
+    global player_one
     firstplay=0
-    if clip.isplaying()==True:
+    if clip.isplaying()==False:
+        clip2.stop()
         clip.play()#check if playing, if not then play file
-    time.sleep(5)
+    time.sleep(2)
     os.system('cls' if os.name == 'nt' else 'clear')
     print('----------------------------------------')
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     global loc,pname,race,exp,lvl
     print('''%s
-Health:  %s    Gold: %i    Experience: %i    Level: %i'''%(pname.strip("'"),stats['health'],gold,exp,lvl))
+Health:  %s    Gold: %i    Experience: %i    Level: %i'''%(pname.strip("'"),player_one.health,gold,player_one.exp,player_one.level))
     print('%s, your current location is %r'%(pname.strip("'"),loc))
     print('''
 
@@ -331,8 +352,9 @@ How fast?
         elif s==3:
             s=3
         elif s==4:#only available for elves
-            if race=='e':
+            if player_one.race=='Elf':
                 print('SUPERSPEED!')
+                s=4
             else:
                 print("You can't go that fast!")
                 s=3
@@ -375,7 +397,9 @@ to the center of the island!''')
     try:
         ref=open('loccheck.txt','r')#check for check file in current directory
     except:
-        ref=open('storage/sdcard0/Download/loccheck.txt','r')#check android download folder
+        print('Location file not found')
+        time.sleep(3)
+        quit()
 
         
     line=ref.readline()
@@ -398,10 +422,9 @@ def event(etype):#if an event is found, a letter is passed that determines the e
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     if etype=='a':#a calls enemy, b is treasure, c is trap, d is merchant, e is random for now (will have friend and city
         print('You have encountered an enemy!')
-        time.sleep(2)
+        time.sleep(1)
         enemy()
     elif etype=='b':
-        
         treasure()
     elif etype=='c':
         trap()
@@ -414,14 +437,20 @@ def event(etype):#if an event is found, a letter is passed that determines the e
         travelchoice()
     
 
-    
+############STOP HERE##############
+#######--------------##############
+
+
+
 def enemy():#chooses enemy, highest chance is goblin, then orc, then trap least likely
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     e=random.randint(1,10)
     if e<=5:
-        goblin(estats)
+        goblin_a(None)
     elif e<=8:
-        orc(estats)
+        orc_a(None)
+    #elif e==9:
+    #    delf_a()
     else:
         trap()
     
@@ -429,14 +458,15 @@ def enemy():#chooses enemy, highest chance is goblin, then orc, then trap least 
 
 
 def heal():
+    global player_one
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     if 'Health Potion' in inv:
-        stats['health']=stats['health']+dice['20r']
+        player_one.health+=dice['20r']
         inv.remove('Health Potion')
     else:
         print('NO HEALTH POTIONS!')
         travelchoice()
-    print('You healed! Your new health is %i'%stats['health'])
+    print('You healed! Your new health is %i'%player_one.health)
     travelchoice()
 
     
@@ -460,20 +490,20 @@ def treasure():#gives treasure based on d20 roll, you can actually lose gold on 
         travelchoice()
     else:
         print('You thought you saw something, but must have just been your imagination')
-        time.sleep(4)
+        time.sleep(2)
         travelchoice()
 
     
 def randevent():#random event, most likely nothing, then enemy, then treasure
     num=random.randint(1,10)
-    if num<=7:
+    if num<=6:
         print('An uneventful day ends')
         print('----------------------------------------\n\n')
     elif num<=9:
         enemy()
     elif num==10:
         treasure()
-    time.sleep(4)
+    time.sleep(1)
     travelchoice()
 
     
@@ -564,59 +594,58 @@ def trap():#trap, auto damage unless avoided with d20 chance roll
     if chance<17:
         print('AH! You stepped on a trap!')
         dmg=dice['10r']
-        stats['health']-=dmg
+        player_one.health-=dmg
         travelchoice()
     else:
         print('You found a trap, but were able to avoid it.')
         travelchoice()
           
-def orc(estats):
+def orc_a(e):
+    if e==None:
+        o=orc()
+    else:
+        o=e
     clip.stop()
     global firstplay
     if firstplay==0:
         clip2.play()
         firstplay+=1
-    
-    if estats['health']<=0:
+    if o.health<=0:
         print('You killed it!')
-        estats['c']=0
         treasure()
         travelchoice()
     print('----------------------------------------\n\n')
     
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    if estats['c']==0:
-        nume=1
-        print('You have met %i orcs!'%nume)
-        
-        estats={'health':15,'strength':10,'magic':0,'stamina':5,'accuracy':3,'speed':11,'c':1}
-    print('Your health=%f          Enemy health=%f'%(stats['health'],estats['health']))
-    act(estats,'orc1')
+    print('You have met orcs!')
+    print('Your health=%f          Enemy health=%f'%(player_one.health,o.health))
+    act(o)
 
         
-def goblin(estats):
+def goblin_a(e):
+    if e==None:
+        g=goblin()
+    else:
+        g=e
     clip.stop()
     global firstplay
     if firstplay==0:
         clip2.play()
         firstplay+=1
+
     print('----------------------------------------\n\n')
-    if estats['health']<=0:
+    if g.health<=0:
         print('You killed it!')
-        estats['c']=0
         treasure()
         travelchoice()
  
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    if estats['c']==0:
-        nume=1
-        print('You have met %i goblins!'%nume)
+    print('You have met goblins!')
         
-        estats={'health':10,'strength':5,'magic':5,'stamina':3,'accuracy':12,'speed':random.randint(6,18),'c':1}
-    print('Your health=%f          Enemy health=%f'%(stats['health'],estats['health']))
-    act(estats,'goblin1')
+    print('Your health=%f          Enemy health=%f'%(player_one.health,g.health))
+    act(g)
         
-def act(estats,etype):#generic action
+def act(enemy):#generic action
     
     print('----------------------------------------\n\n')
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
@@ -635,17 +664,17 @@ Defend
         a='h'
     else:
         print('Invalid entry')
-        act(estats,etype)#get action
+        act(enemy)#get action
           
     if a==1:
         b=atype()
         time.sleep(1)
         if b==1:
-            melee(estats,etype)
+            melee(enemy)
         elif b==2:
-            magic(estats,etype)
+            magic(enemy)
         elif b==3:
-            shoot(estats,etype)
+            shoot(enemy)
     elif a==2:
         crun=dice['20r']
         if crun>=16:
@@ -657,26 +686,24 @@ Defend
         else:
             print('The enemy catches you!')
             time.sleep(1)
-            estats['c']=1
-            eact(estats,etype)
+            eact(enemy)
     elif a=='h':
         print('While defending, you gain life!')
         time.sleep(1)
-        estats['c']=1
-        stats['health']+=dice['20r']
-        if dice['20r']>(estats['speed']):
-            if etype=='orc1':
+        player_one.health+=dice['20r']
+        if dice['20r']>(enemy.speed):
+            if enemy.level>=3:
                 print('You stopped them!')
-                orc(estats)
-            elif etype=='goblin1':
+                orc_a(enemy)
+            elif enemy.level>=0:
                 print('You stopped them!')
-                goblin(estats)
+                goblin_a(enemy)
             else:
                 print('code error')
-                act(estats,etype)
-        eact(estats,etype)
+                act(enemy)
+        eact(enemy)
     else:
-        act(estats,etype)
+        act(enemy)
 def mweaponcheck(a,i):
     if 'Sword4' in i:
         print('You use your Sword4!')
@@ -709,254 +736,260 @@ def sweaponcheck(a,i):
     else:
         print('You use your sling shot!')
         return a
-def melee(estats,etype):
+def melee(enemy):
     global exp,inv
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    astr=dice['8r']*stats['strength']
-    estr=dice['8r']*estats['strength']
+    astr=dice['8r']*player_one.strength
+    estr=dice['10r']*enemy.strength
     print(astr,' ',estr)
     astr=mweaponcheck(astr,inv)
     print('With weapon: ',astr)
     if astr>estr:
         dmg=astr/10
         print('You did %f damage!'%dmg)
-        estats['health']-=dmg
-        if estats['health']<=0:
+        enemy.health-=dmg
+        if enemy.health<=0:
             print('You killed it!')
             treasure()
             time.sleep(1)
-            estats['c']=0
-            if etype=='orc1':
-                exp+=random.randint(1,10)
-            elif etype=='goblin1':
-                exp+=random.randint(1,5)
+
+            if enemy.level>=2:
+                player_one.exp+=random.randint(1,10)
+            else:
+                player_one.exp+=random.randint(1,5)
             clip2.stop()
             clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
-            eact(estats,etype) #enemy action passing stats and enemy type
+            eact(enemy) #enemy action passing stats and enemy type
     elif astr==estr:
         print("It's a draw!")
         time.sleep(1)
-        eact(estats,etype)
+        eact(enemy)
     elif astr<=estr:
         print("You miss!")
         time.sleep(1)
-        eact(estats,etype)
-def magic(estats,etype):
+        eact(enemy)
+def magic(enemy):
     global exp,inv
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    global exp
-    astr=dice['8r']*stats['magic']
-    estr=dice['8r']*estats['magic']
+    astr=dice['8r']*player_one.magic
+
+    estr=dice['8r']*enemy.magic
     if astr>estr:
-        dmg=dice['8r']+stats['magic']/10
+        dmg=dice['8r']+player_one.magic/10
         print('You did %f damage!'%dmg)
         time.sleep(1)
-        estats['health']-=dmg
-        if estats['health']<=0:
+        enemy.health-=dmg
+        if enemy.health<=0:
             print('You killed it!')
             treasure()
-            if etype=='orc1':
-                exp+=random.randint(1,10)
-            elif etype=='goblin1':
-                exp+=random.randint(1,5)
+            if enemy.lvl>=3:
+                player_one.exp+=random.randint(1,10)
+            else:
+                player_one.exp+=random.randint(1,5)
             time.sleep(1)
-            estats['c']=0
-            exp+=random.randint(1,10)
+            player_one.exp+=random.randint(1,10)
             clip2.stop()
             clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
-            eact(estats,etype)
+            eact(enemy)
     elif astr==estr:
         print("It's a draw!")
         time.sleep(1)
-        eact(estats,etype)
+        eact(enemy)
     elif astr<=estr:
         print("You miss!")
         time.sleep(1)
-        eact(estats,etype)
-def shoot(estats,etype):
+        eact(enemy)
+def shoot(enemy):
     global exp,inv
-    astr=dice['8r']*stats['accuracy']
-    estr=dice['8r']*estats['speed']
+    astr=dice['8r']*player_one.accuracy
+    estr=dice['8r']*enemy.speed
     astr=sweaponcheck(astr,inv)
     print('new ',astr)
     if astr>estr:
-        dmg=dice['8r']+stats['accuracy']/10
+        dmg=dice['8r']+player_one.accuracy/10
         print('You did %f damage!'%dmg)
         time.sleep(1)
-        estats['health']-=dmg
-        if estats['health']<=0:
+        enemy.health-=dmg
+        if enemy.health<=0:
             print('You killed it!')
             treasure()
-            if etype=='orc1':
+            if enemy.lvl>=3:
                 exp+=random.randint(1,10)
-            elif etype=='goblin1':
+            else:
                 exp+=random.randint(1,5)
             time.sleep(1)
-            estats['c']=0
             clip2.stop()
             clip.play()
             travelchoice()
             ###------------------------------------------------
         else:
-            eact(estats,etype)
+            eact(enemy)
     elif astr==estr:
         print("It's a draw!")
         time.sleep(1)
-        eact(estats,etype)
+        eact(enemy)
     elif astr<=estr:
         print("You miss!")
         time.sleep(1)
-        eact(estats,etype)
+        eact(enemy)
     else:
         print('CODE ERROR!')
-        act(estats,etype)
+        act(enemy)
 
-def edecision(m,a,s,estats,etype):
+def edecision(m,a,s,enemy):
     if a>=s:
-        emelee(estats,etype)
+        emelee(enemy)
     elif s>=m:
-        eshoot(estats,etype)
+        eshoot(enemy)
     elif m>=a:
-        emagic(estats,etype)
+        emagic(enemy)
     elif a==s==m:
-        if etype=='orc1':
-            emelee(estats,etype)
-        elif etype=='goblin1':
-            eshoot(stats,etype)
-def emelee(estats,etype):
+        emelee(enemy)
+def emelee(enemy):
     print('The enemy takes a swing!')
     time.sleep(.5)
-    estr=dice['8r']*stats['strength']
-    astr=dice['8r']*estats['strength']
+    estr=dice['8r']*enemy.strength
+    astr=dice['8r']*player_one.strength
     print(estr, astr)
     if astr>estr:
-        dmg=dice['8r']+estats['strength']/10
+        dmg=dice['8r']+enemy.strength/10
         print('They did %f damage!'%dmg)
         time.sleep(1)
-        stats['health']-=dmg
-        if stats['health']<=0:
+        player_one.health-=dmg
+        if player_one.health<=0:
                 print('They killed you!')
-                estats['c']=0
                 time.sleep(5)
                 quit()
-                ###------------------------------------------------
+
         else:
-                if etype=='orc1':
-                        orc(estats)
-                elif etype=='goblin1':
-                        goblin(estats)
+                if enemy.lvl>=3:
+                        orc_a(enemy)
+                elif enemy.lvl>=0:
+                        goblin_a(enemy)
                 else:
                         print('code error')
-                        eact(estats,etype)
+                        eact(enemy)
     elif astr==estr:
-        print("It's a draw!")
-        time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
         else:
-                print('code error')
-                eact(estats,etype)
+            print('code error')
+            eact(enemy)
     elif astr<=estr:
         print("They miss!")
         time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
         else:
-                print('code error')
-                eact(estats,etype)
-def eshoot(estats,etype):
+            print('code error')
+            eact(enemy)
+def eshoot(enemy):
     print('The enemy shoots at you!')
     time.sleep(.5)        
-    estr=dice['8r']*stats['accuracy']
-    astr=dice['8r']*estats['speed']
+    astr=dice['8r']*player_one.accuracy
+    estr=dice['8r']*enemy.accuracy
     print(estr, astr)
     if astr>estr:
-        dmg=dice['8r']+estats['accuracy']/10
+        dmg=dice['8r']+enemy.accuracy/10
         print('They did %f damage!'%dmg)
         time.sleep(1)
-        stats['health']-=dmg
-        if stats['health']<=0:
+        player_one.health-=dmg
+        if player_one.health<=0:
                 print('They killed you!')
                 time.sleep(5)
                 quit()
-                ###------------------------------------------------
         else:
-                if etype=='orc1':
-                        orc(estats)
-                elif etype=='goblin1':
-                        goblin(estats)
+                if enemy.lvl>=3:
+                        orc_a(enemy)
+                elif enemy.lvl>=0:
+                        goblin_a(enemy)
                 else:
                         print('code error')
-                        eact(estats,etype)
+                        eact(enemy)
 
     elif astr==estr:
         print("It's a draw!")
         time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
+        else:
+            print('code error')
+            eact(enemy)
 
 
     elif astr<=estr:
         print("They miss!")
         time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
+        else:
+            print('code error')
+            eact(enemy)
 def emagic(estats,etype):
     print('Enemy casts a spell!')
     time.sleep(.5)
-    estr=dice['8r']*stats['magic']
-    astr=dice['8r']*estats['magic']
+    estr=dice['8r']*enemy.magic
+    astr=dice['8r']*player_one.magic
     print(estr, astr)
-    if astr>estr:
-        dmg=dice['8r']+estats['magic']/10
+    if estr>astr:
+        dmg=dice['8r']+enemy.magic/10
         print('They did %f damage!'%dmg)
         time.sleep(1)
-        stats['health']-=dmg
-        if stats['health']<=0:
+        player_one.health-=dmg
+        if player_one.health<=0:
                 print('You died!')
                 time.sleep(3)
                 quit()
                 ###------------------------------------------------
         else:
-                if etype=='orc1':
-                        orc(estats)
-                elif etype=='goblin1':
-                        goblin(estats)
+                if enemy.lvl>=3:
+                        orc_a(enemy)
+                elif enemy.lvl>=0:
+                        goblin_a(enemy)
+                else:
+                        print('code error')
+                        eact(enemy)
 
     elif astr==estr:
         print("It's a draw!")
         time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
+        else:
+            print('code error')
+            eact(enemy)
 
     elif astr<=estr:
         print("They miss!")
         time.sleep(1)
-        if etype=='orc1':
-                orc(estats)
-        elif etype=='goblin1':
-                goblin(estats)
+        if enemy.lvl >= 3:
+            orc_a(enemy)
+        elif enemy.lvl >= 0:
+            goblin_a(enemy)
+        else:
+            print('code error')
+            eact(enemy)
                     
-def eact(estats,etype):#enemy action
+def eact(enemy):#enemy action
     print('----------------------------------------\n\n')
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
-    if estats['health']<3:
+    if enemy.health<3:
         if dice['20r']>=18:
             print('They escaped!')
             clip2.stop()
@@ -966,10 +999,10 @@ def eact(estats,etype):#enemy action
         else:
             print("Enemy tried to run, but they didn't make it")
             time.sleep(.5)
-    m=estats['magic']*dice['8r']
-    a=estats['strength']*dice['8r']
-    s=estats['accuracy']*dice['8r']
-    edecision(m,a,s,estats,etype)
+    m=enemy.magic*dice['8r']
+    a=enemy.strength*dice['8r']
+    s=enemy.accuracy*dice['8r']
+    edecision(m,a,s,enemy)
     
 
 def atype():
@@ -980,7 +1013,7 @@ Melee
 Magic
 Shoot
 ''')
-    a=input('What do you want to do?').lower()
+    a=input('What do you want to do? ').lower()
     if a=='melee':
         print('You swing!')
         return 1
@@ -993,7 +1026,9 @@ Shoot
     else:
         print('Invalid entry')
         atype()
-
+##############FIX SAVING##################
+##########################################
+##########################################
 
 def save():#save all important stats and info
     svfile=open('paradisiosave.txt','w')
