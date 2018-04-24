@@ -28,7 +28,7 @@ gold=1000 #starting global gold
 loc={'x':0,'y':0}#location by dictionary
 #lvl=1#difficulty level, will be increased over time
 
-dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}#first roll of dice, rolled at the beginning of all functions to see if needed
+#dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}#first roll of dice, rolled at the beginning of all functions to see if needed
 inv=[]#inventory starts empty
 clip=mp3play.load(r'ffmain.mp3')
 clip2=mp3play.load(r'Retribution.mp3')
@@ -59,6 +59,8 @@ class Player:
         self.level=1
         self.gold=0
         self.lvl=lvl
+    def saveit(self):
+        return (self.strength,self.magic,self.stamina,self.accuracy,self.speed,self.health)
     def return_stats(self):
         return ('''Strength: %s
 Magic: %s
@@ -612,6 +614,12 @@ def orc_a(e):
         firstplay+=1
     if o.health<=0:
         print('You killed it!')
+        if enemy.lvl >= 3:
+            print('You gained experience! ')
+            player_one.exp += random.randint(1, 10)
+        else:
+            print('You gained experience! ')
+            player_one.exp += random.randint(1, 5)
         treasure()
         travelchoice()
     print('----------------------------------------\n\n')
@@ -636,6 +644,12 @@ def goblin_a(e):
     print('----------------------------------------\n\n')
     if g.health<=0:
         print('You killed it!')
+        if enemy.lvl >= 3:
+            print('You gained experience! ')
+            player_one.exp += random.randint(1, 10)
+        else:
+            print('You gained experience! ')
+            player_one.exp += random.randint(1, 5)
         treasure()
         travelchoice()
  
@@ -692,10 +706,10 @@ Defend
         time.sleep(1)
         player_one.health+=dice['20r']
         if dice['20r']>(enemy.speed):
-            if enemy.level>=3:
+            if enemy.lvl>=3:
                 print('You stopped them!')
                 orc_a(enemy)
-            elif enemy.level>=0:
+            elif enemy.lvl>=0:
                 print('You stopped them!')
                 goblin_a(enemy)
             else:
@@ -750,15 +764,18 @@ def melee(enemy):
         enemy.health-=dmg
         if enemy.health<=0:
             print('You killed it!')
-            treasure()
+
             time.sleep(1)
 
-            if enemy.level>=2:
+            if enemy.lvl>=2:
+                print('You gained experience! ')
                 player_one.exp+=random.randint(1,10)
             else:
+                print('You gained experience! ')
                 player_one.exp+=random.randint(1,5)
             clip2.stop()
             clip.play()
+            treasure()
             travelchoice()
             ###------------------------------------------------
         else:
@@ -784,15 +801,19 @@ def magic(enemy):
         enemy.health-=dmg
         if enemy.health<=0:
             print('You killed it!')
-            treasure()
+
             if enemy.lvl>=3:
+                print('You gained experience! ')
                 player_one.exp+=random.randint(1,10)
             else:
+                print('You gained experience! ')
                 player_one.exp+=random.randint(1,5)
             time.sleep(1)
             player_one.exp+=random.randint(1,10)
+            treasure()
             clip2.stop()
             clip.play()
+
             travelchoice()
             ###------------------------------------------------
         else:
@@ -807,6 +828,7 @@ def magic(enemy):
         eact(enemy)
 def shoot(enemy):
     global exp,inv
+    dice = {'8r': random.randint(1, 8), '10r': random.randint(1, 10), '20r': random.randint(1, 20)}
     astr=dice['8r']*player_one.accuracy
     estr=dice['8r']*enemy.speed
     astr=sweaponcheck(astr,inv)
@@ -818,14 +840,18 @@ def shoot(enemy):
         enemy.health-=dmg
         if enemy.health<=0:
             print('You killed it!')
-            treasure()
+
+
             if enemy.lvl>=3:
-                exp+=random.randint(1,10)
+                print('You gained experience! ')
+                player_one.exp+=random.randint(1,10)
             else:
-                exp+=random.randint(1,5)
+                print('You gained experience! ')
+                player_one.exp+=random.randint(1,5)
             time.sleep(1)
             clip2.stop()
             clip.play()
+            treasure()
             travelchoice()
             ###------------------------------------------------
         else:
@@ -852,6 +878,7 @@ def edecision(m,a,s,enemy):
     elif a==s==m:
         emelee(enemy)
 def emelee(enemy):
+    dice = {'8r': random.randint(1, 8), '10r': random.randint(1, 10), '20r': random.randint(1, 20)}
     print('The enemy takes a swing!')
     time.sleep(.5)
     estr=dice['8r']*enemy.strength
@@ -894,6 +921,7 @@ def emelee(enemy):
             print('code error')
             eact(enemy)
 def eshoot(enemy):
+    dice = {'8r': random.randint(1, 8), '10r': random.randint(1, 10), '20r': random.randint(1, 20)}
     print('The enemy shoots at you!')
     time.sleep(.5)        
     astr=dice['8r']*player_one.accuracy
@@ -940,6 +968,8 @@ def eshoot(enemy):
             print('code error')
             eact(enemy)
 def emagic(estats,etype):
+    dice = {'8r': random.randint(1, 8), '10r': random.randint(1, 10), '20r': random.randint(1, 20)}
+
     print('Enemy casts a spell!')
     time.sleep(.5)
     estr=dice['8r']*enemy.magic
@@ -1026,19 +1056,19 @@ Shoot
     else:
         print('Invalid entry')
         atype()
-##############FIX SAVING##################
-##########################################
-##########################################
+
 
 def save():#save all important stats and info
     svfile=open('paradisiosave.txt','w')
     svfile.write(pname+'\n')
-    svfile.write(str(stats)+'\n')
+    for x in player_one.saveit():
+        svfile.write(str(x)+'\n')
+    #svfile.write(str(stats)+'\n')
     svfile.write(str(gold)+'\n')
     svfile.write(str(loc)+'\n')
     svfile.write(str(inv)+'\n')
-    svfile.write(str(lvl)+'\n')
-    svfile.write(str(exp)+'\n')
+
+
     print('Saving.')
     time.sleep(.5)
     print('Saving..')
@@ -1047,6 +1077,12 @@ def save():#save all important stats and info
     time.sleep(.5)
     svfile.close()
     travelchoice()
+
+
+##############FIX LOADING##################
+##########################################
+##########################################
+
 def load():#load last saved info
     global gold, stats, loc,pname,inv,lvl,exp
     try:
