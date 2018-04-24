@@ -1,4 +1,4 @@
-##HCD Final Fantasy test v .3 last update 4/23/18
+##HCD Final Fantasy test v .40 last update 4/24/18
 #changing everything to classes to make much easier to keep track of entities, and possibly add more characters
 #Added melee,archery weapons and their bonuses
 #still some old things carried over in globals, clean up under way with audio errors too
@@ -8,7 +8,6 @@
 #tested with two enemy types (goblin/orc), attack, defend, run all work, melee, magic, defend all work
 #going to add more enemies, more full location list, better user interaction
 #mapgen created, gives map, and a separate file with sorted locations to make easier to test, hit 50 or -50 boots you to 0,0
-#try created to check for file in two places before kicking an error
 #created inventory, will add items as needed, deciding on weight calc
 #Added audio, mp3s. One plays at start. Other plays during attacks. Volume set to 70%
 #audio does not reboot on attacks now, just keeps playing
@@ -47,7 +46,7 @@ class Enemy:
 
 
 class Player:
-    def __init__(self,strength,magic_att,stamina,accuracy,speed,health,race,lvl):
+    def __init__(self,strength,magic_att,stamina,accuracy,speed,health,race,exp,lvl):
         self.health=health
         self.strength=strength
         self.magic=magic_att
@@ -55,12 +54,10 @@ class Player:
         self.accuracy=accuracy
         self.speed=speed
         self.race=race
-        self.exp=0
-        self.level=1
-        self.gold=0
+        self.exp=exp
         self.lvl=lvl
     def saveit(self):
-        return (self.strength,self.magic,self.stamina,self.accuracy,self.speed,self.health)
+        return (self.health,self.strength,self.magic,self.stamina,self.accuracy,self.speed,self.race,self.exp,self.lvl)
     def return_stats(self):
         return ('''Strength: %s
 Magic: %s
@@ -182,7 +179,7 @@ def human():#human race chosen, create player object with correct stats
     global player_one
     print('Human')
     #stats['strength']=random.randint(3,18)
-    player_one=Player(random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),100,'human',0)
+    player_one=Player(random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),random.randint(3,18),100,'human',0,1)
 
     print('Your character has the following stats:')
     print(player_one.return_stats())
@@ -192,7 +189,7 @@ def elf():#elf race chosen, create player object with correct stats
     global player_one
     print('Elf')
     player_one = Player(random.randint(3, 15), random.randint(5, 18), random.randint(3, 18),
-                        random.randint(8, 18), random.randint(9, 18), 110, 'elf',0)
+                        random.randint(8, 18), random.randint(9, 18), 110, 'elf',0,1)
 
 
 
@@ -205,7 +202,7 @@ def elf():#elf race chosen, create player object with correct stats
 def troll():#troll race chosen, create player object with correct stats
     global player_one
     player_one = Player(random.randint(9, 18), random.randint(1, 15), random.randint(9, 18),
-                        random.randint(1, 14), random.randint(1, 10), 125, 'troll',0)
+                        random.randint(1, 14), random.randint(1, 10), 125, 'troll',0,1)
     print('Troll')
 
     print('Your character has the following stats:')
@@ -217,7 +214,7 @@ def dwarf():#dwarf race chosen, create player object with correct stats
     global player_one
     print('Dwarf')
     player_one = Player(random.randint(4, 18), random.randint(1, 16), random.randint(9, 18),
-                        random.randint(1, 18), random.randint(1, 18), 100, 'dwarf',0)
+                        random.randint(1, 18), random.randint(1, 18), 100, 'dwarf',0,1)
 
     print('Your character has the following stats:')
     print(player_one.return_stats())
@@ -290,8 +287,8 @@ def travelchoice():
     dice={'8r':random.randint(1,8),'10r':random.randint(1,10),'20r':random.randint(1,20)}
     global loc,pname,race,exp,lvl
     print('''%s
-Health:  %s    Gold: %i    Experience: %i    Level: %i'''%(pname.strip("'"),player_one.health,gold,player_one.exp,player_one.level))
-    print('%s, your current location is %r'%(pname.strip("'"),loc))
+Health:  %s    Gold: %i    Experience: %i    Level: %i'''%(pname,player_one.health,gold,player_one.exp,player_one.lvl))
+    print('%s, your current location is %r'%(pname,loc))
     print('''
 
 Actions:
@@ -437,10 +434,6 @@ def event(etype):#if an event is found, a letter is passed that determines the e
     else:
         print('Error, my bad :(')
         travelchoice()
-    
-
-############STOP HERE##############
-#######--------------##############
 
 
 
@@ -668,7 +661,7 @@ Attack
 Run
 Defend
 ''')
-    a=input('What do you want to do?').lower()
+    a=input('What do you want to do? ').lower()
     
     if a=='attack':
         a=1
@@ -1078,13 +1071,8 @@ def save():#save all important stats and info
     svfile.close()
     travelchoice()
 
-
-##############FIX LOADING##################
-##########################################
-##########################################
-
 def load():#load last saved info
-    global gold, stats, loc,pname,inv,lvl,exp
+    global gold, stats, loc,pname,inv,lvl,exp,player_one
     try:
         svfile=open('paradisiosave.txt','r')#check for check file in current directory
     except FileNotFoundError:
@@ -1092,24 +1080,23 @@ def load():#load last saved info
     except:
         print('UH OH!')#check android download folder
 
-    pname=svfile.readline().strip('\n')
-    stats=eval(svfile.readline())
-    for (x,y) in stats.items():
-        print(int(y))
-    gold=int(svfile.readline())
-    loc=eval(svfile.readline())
-    inv=eval(svfile.readline())
-    lvl=int(svfile.readline())
-    exp=int(svfile.readline())
+    withn=svfile.readlines()
+    all=[]
+    for x in withn:
+        x=x.strip('\n')
+        all.append(x)
+    pname=all[0]
+    player_one=Player(int(all[1]),int(all[2]),int(all[3]),int(all[4]),int(all[5]),int(all[6]),all[7],int(all[8]),int(all[9]))
+    gold=int(all[10])
+    loc=eval(all[11])
+    inv=eval(all[12])
     svfile.close()
     print('Player name: ',pname)
-    print('Stats:')
-    for (s,v) in stats.items():
-        print(s.title(),": ",v)
+    print(player_one.return_stats())
     print('Gold: ',gold)
     print('Location: ',loc)
     print('Inventory: ',inv)
-    print('Level: ',lvl)
-    print('Experience: ',exp)
+    print('Level: ',player_one.lvl)
+    print('Experience: ',player_one.exp)
     travelchoice()
 maingreeting()
