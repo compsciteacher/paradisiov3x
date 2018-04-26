@@ -1,13 +1,13 @@
-dude
-88
-16
-10
-10
-5
+bob
 15
-human
-62
-2
-1589
-{'x': 7, 'y': 0}
-[]
+6
+10
+4
+5
+125
+troll
+0
+1
+1000
+{'x': 0, 'y': 0}
+['Health Potion','Health Potion','Health Potion','Health Potion','Health Potion',]
