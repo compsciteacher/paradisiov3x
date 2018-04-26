@@ -2,7 +2,7 @@
 #ALPHA FINISHD
 #changing everything to classes to make much easier to keep track of entities, and possibly add more characters
 #Added melee,archery weapons and their bonuses
-#still some old things carried over in globals, clean up under way with audio errors too
+#still some old things carried over in globals, clean up under way (audio seems fixed now)
 
 
 ##Multi character, mapped, simple AI, single weapon, 4 race, single ability
@@ -11,7 +11,7 @@
 #mapgen created, gives map, and a separate file with sorted locations to make easier to test, hit 50 or -50 boots you to 0,0
 #created inventory, will add items as needed, deciding on weight calc
 #Added audio, mp3s. One plays at start. Other plays during attacks. Volume set to 70%
-#audio does not reboot on attacks now, just keeps playing
+#audio does not reboot on attacks or movement now, just keeps playing
 
 
 
@@ -269,21 +269,14 @@ def travelchoice():
     #this is to choose direction, and speed. Also inventory, heal, save, quit
     # gives location first, also shows health and gold
     levelcheck()
-    clip2.stop()
-    global firstplay
-    global player_one
-    if clip.isplaying()!=True:
-        clip.play()
-    elif firstplay==0: #found working version!
+    global loc, pname, race, exp,firstplay
+    if firstplay==0:
         clip.play()
         firstplay+=1
-    #if clip.isplaying()==False: #OK, an old version had this working, it is so audio doesn't restart on every tc
-    #    clip2.stop()
-    #    clip.play()#check if playing, if not then play file
     time.sleep(1)
     os.system('cls' if os.name == 'nt' else 'clear')
     print('----------------------------------------')
-    global loc,pname,race,exp
+
     print('''%s
 Health:  %s    Gold: %i    Experience: %i    Level: %i'''%(pname,player_one.health,gold,player_one.exp,player_one.lvl))
     print('%s, your current location is %r'%(pname,loc))
@@ -326,7 +319,6 @@ Quit: Quit game
     elif d=='quit':
         yn=input('Are you sure (y/n)? ')
         if yn=='y':
-            save()
             quit()
         else:
             travelchoice()
@@ -377,6 +369,7 @@ How fast?
     
 def locchk():
     global loc, firstplay
+
     for val in loc.values():#check edge of map, it is 100x100 right now when you hit edge it just sends to center
         if val>=50:
             print('''You have reached the edge of the island!
@@ -415,7 +408,7 @@ to the center of the island!''')
     
     randevent()
     ref.close()
-    firstplay=0
+    firstplay=1
 
     travelchoice()
 
@@ -441,6 +434,7 @@ def event(etype):#if an event is found, a letter is passed that determines the e
 def enemy():#chooses enemy, highest chance is goblin, then orc, then trap least likely
     global firstplay
     print(firstplay)
+    clip2.volume(7)
     clip2.play()
     e=random.randint(1,10)
     if e<=5:
@@ -466,7 +460,7 @@ def heal():
         travelchoice()
     print('You healed! Your new health is %i'%player_one.health)
     time.sleep(1)
-    firstplay = 0
+    firstplay = 1
     travelchoice()
 
 def treasure():#gives treasure based on d20 roll, you can actually lose gold on a 1, on 19 or 20 you get nothing
@@ -501,13 +495,13 @@ def randevent():#random event, most likely nothing, then enemy, then treasure
         print('An uneventful day ends')
         print('----------------------------------------\n\n')
     elif num<=8:
-        firstplay=0
+        clip.stop()
         enemy()
     elif num==9:
-        firstplay = 0
+        firstplay = 1
         merchant()
     elif num==10:
-        firstplay = 0
+        firstplay = 1
         treasure()
     time.sleep(1)
     travelchoice()
