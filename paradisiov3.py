@@ -1,5 +1,5 @@
 ##HCD Final Fantasy test v .50 last update 4/25/18
-#ALPHA FINISHD
+#ALPHA FINISHED
 #changing everything to classes to make much easier to keep track of entities, and possibly add more characters
 #Added melee,archery weapons and their bonuses
 #still some old things carried over in globals, clean up under way (audio seems fixed now)
