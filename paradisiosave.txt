@@ -1,13 +1,13 @@
 bob
-15.0
-6.0
-10.0
-4.0
-5.0
-125.0
-troll
-0.0
-1.0
-1000
-{'x': 0, 'y': 3}
-['Health Potion', 'Health Potion', 'Health Potion', 'Health Potion', 'Health Potion']
+10
+17
+12
+5
+5
+84.5
+human
+5
+1
+1025
+{'x': 0, 'y': 1}
+[]

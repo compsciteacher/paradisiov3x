@@ -15,7 +15,7 @@
 
 
 
-import math, sys, random, time, cmd, textwrap, string,os, mp3play
+import math, sys, random, time, textwrap, os, mp3play
 sw=80 #line width, may fix at some point
 pname=""#primary name
 sname=""#secondary name
@@ -125,6 +125,8 @@ who found you on the roadside.
         racechoice()
     else:
         newg()
+
+
 def racechoice(): #allows other races, changes race, calls race function to update stats
     global pname,race #I shouldn't use globals :(
     r_choice=input('''---------------------------------
@@ -175,6 +177,7 @@ You look silly, I'm going to go tell my friends I saw a silly creature!
     else:
         racechoice()
     travelchoice() #kind of the main menu while playing the game
+
 def human():#human race chosen, create player object with correct stats
     global player_one
     print('Human')
@@ -184,6 +187,7 @@ def human():#human race chosen, create player object with correct stats
     print(player_one.return_stats())
     print('----------------------------------------')
     time.sleep(3) #again figuring out timing on this
+
 def elf():#elf race chosen, create player object with correct stats
     global player_one
     print('Elf')
