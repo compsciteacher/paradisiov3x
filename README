@@ -6,6 +6,8 @@ Paradisio is a text based RPG based in the land of Paradisio. As a wayward trave
 
 This is a 50x50 map with random enemies, treasures, traps, and stores throughout. Every new game a new map is generated. You can save all stats, items, and player info throughout into a simple text file.
 
+paradisiov3.py is the actual game :)
+
 '''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
